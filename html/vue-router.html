@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue路由</title>
+    <!--1、引入vue路由-->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+</head>
+<body>
+<div id="app">
+    <p>
+        <!--2、router-link: 默认被渲染为a标签 to属性：指定路由链接，es6简写，相当于{path:'资源名'}，可拼接参数-->
+        <router-link to="/">首页</router-link>
+        <router-link to="/goods">商品</router-link>
+        <router-link to="/user">用户</router-link>
+<!--        <router-link to="/home">主页</router-link>-->
+        <!--带参路由（params）-->
+        <!--        <router-link to="{name:'home',params:{id:'10'}}">主页</router-link>-->
+        <!--动态路由，在第5步路由匹配规则中定义：path: '/home/:id'-->
+        <!--        <router-link to="/home/10">主页</router-link>-->
+    </p>
+    <!--3、路由出口：路由匹配到的组件将渲染到这里（路由占位符）-->
+    <router-view></router-view>
+</div>
+</body>
+
+<script>
+    /*
+    1、锚点
+    1）是网页制作中超级链接的一种，又叫命名锚记，像一个迅速定位器一样，是一种页面内的超级链接，运用相当普遍
+    这些链接可快速将访问者带到指定位置；使用命名锚记可以在文档中设置标记，这些标记通常放在文档的特定主题处或顶部
+    2）特点：单页Web应用(SPA)，预先加载页面内容
+    3）形式：url#锚点
+    2、路由
+    一个路由就是一组映射关系(key-value)，key为路径，value可能是function或component
+    3、vue路由的作用
+    Vue.js路由允许我们通过锚点定义不同的URL，以达到访问不同的页面的目的，每个页面的内容通过延迟加载渲染出来
+    通过Vue.js可以实现多视图的单页Web应用(SPA)
+    4、路由的分类
+    1）后端路由：
+    value是function，用于处理客户端请求；工作过程：服务器接收到一个请求时，根据请求路径找到匹配的函数来处理请求，返回响应数据
+    2）前端路由：
+    value是component，用于展示页面内容；工作过程：当浏览器的路径改变时，对应的组件就会显示
+    5、使用
+    */
+
+    // 4、定义路由组件
+
+    const Welcome = {template: '<div>首页信息</div>'}
+    const Goods = {template: '<div>商品信息</div>'}
+    const User = {template: '<div>用户信息</div>'}
+
+    // 复杂的组件可从独立的vue文件中引入（引入一个组件）
+    // import Home from "../components/home";
+    // export default {
+    //     // 局部注册：在components中注册引入的外部组件
+    //     components: {Home}
+    // }
+    // 全局注册
+    // Vue.component('Home',Home);
+    // 外部组件使用：在页面以标签对<Home></Home>的形式插入组件
+
+    // 5、定义路由（每个路由都应该映射一个组件）
+    const routes = [
+        // 路由的匹配规则；path:要匹配的hash地址；component:要展示的组件
+        {path: '/', redirect: '/welcome'}, // redirect:路由重定向，设置默认指向路径
+        {path: '/welcome', component: Welcome},
+        {path: '/goods', component: Goods},
+        {path: '/user', component: User},
+        // {path: '/home', component: Home},
+        // {path: '/home/:id', component: home} // 动态路由
+    ]
+
+    // 6、创建router实例，传递路由routes配置
+    const router = new VueRouter({
+        routes, // es6简写，相当于routes: routes
+    })
+
+    // 7、创建和挂载router实例（使整个应用都有路由功能）
+    new Vue({
+        el: '#app',
+        router,
+    })
+
+    // 扩展：路由守卫：对路由进行权限控制，分类：全局守卫、组件/导航守卫
+    // 全局守卫：每发生路由导航跳转时，都会触发全局守卫
+    // 案例：前端鉴权
+
+    // to:将要访问的路由的信息对象；from:将要离开的路由的信息对象；next:是一个函数
+    // next函数的三种调用方式：
+    // 1)当用户拥有后台的访问权限(token)，则直接放行：next()
+    // 2)当用户没有后台的访问权限(token)，强制跳到登录页面：next('/login')
+    // 3)当用户没有后台的访问权限(token)，不允许跳到后台：next(false)
+    // ()=>{} es6定义函数新语法，相当于function beforeEach(to, from, next) {}
+    router.beforeEach((to,from,next) => {
+        if (to.path === '/main'){
+            const token = localStorage.getItem('token');
+            if (token !== '' && token != null){
+                // 访问后台：token有值(已登录)，放行
+                next();
+            } else {
+                // 访问后台：token没值(未登录)，跳转到登录页面
+                next('/login');
+            }
+        } else {
+            // 访问的是没有权限的页面，放行
+            next();
+        }
+    })
+
+</script>
+
+</html>

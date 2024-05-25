@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>基于Axios、Vue、el-UI的异步进度条</title>
+    <!--axios-->
+    <script src="../js/axios.js"></script>
+    <!--el-UI相关-->
+    <!--import Vue before Element-->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!--import JavaScript 引入组件库-->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!--import CSS 引入样式-->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+
+<template>
+    <div style="padding: 10px 300px" id="progress">
+        <h3>进度条显示</h3>
+        <el-button @click="req">请求</el-button>
+        <el-button @click="reset">重置</el-button>
+        <br><br>
+        <div>{{percentage}}%</div>
+        <br>
+        <el-progress
+                :text-inside="true"
+                :stroke-width="16"
+                :percentage="percentage"
+                status="success"></el-progress>
+    </div>
+</template>
+
+<script type="module">
+
+    export default {
+        data() {
+            return {
+                percentage: 0
+            };
+        },
+        methods: {
+            async req() {
+                const th = this
+                await axios({
+                    url: "URI/progress",  // 请求后台地址
+                    method: 'get',
+                    // axios发送请求，将后端实时返回的结果换算成百分比，赋值给data中的变量
+                    onDownloadProgress(progress) {
+                        const step = Math.round(progress.loaded / progress.total * 100)
+                        th.percentage = step
+                        console.log(step + '%')
+                    }
+                }).then(() => {
+                    console.log("解析完成")
+                })
+            },
+
+            reset() {
+                this.percentage = 0
+            }
+        }
+
+    }
+</script>
+
+</body>
+</html>
